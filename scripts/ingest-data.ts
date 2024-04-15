@@ -6,13 +6,14 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 
-/* Name of directory to retrieve your files from 
+/* Name of directory to retrieve your files from
    Make sure to add your PDF files inside the 'docs' folder
 */
 const filePath = 'docs';
 
 export const run = async () => {
   try {
+    // const pinecone = await initPinecone();
     /*load raw docs from the all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
       '.pdf': (path) => new PDFLoader(path),
@@ -28,13 +29,17 @@ export const run = async () => {
     });
 
     const docs = await textSplitter.splitDocuments(rawDocs);
-    console.log('split docs', docs);
+    // console.log('split docs', docs);
 
     console.log('creating vector store...');
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
     const index = pinecone.Index(PINECONE_INDEX_NAME); //change to your own index name
-
+    // console.log(PINECONE_INDEX_NAME)
+    // console.log(PINECONE_NAME_SPACE)
+    // console.log(index)
+    const indexes = await pinecone.listIndexes()
+    console.log(indexes)
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
